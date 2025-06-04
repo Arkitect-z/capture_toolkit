@@ -1,0 +1,9 @@
+Misc/
+OptiTrack/
+optitrack_export/
+RealSense/
+Tactile/
+demo/
+object/
+SMPL/
+__pycache__/
