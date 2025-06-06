@@ -34,7 +34,7 @@ unzip Optitrack2SMPL.zip -d utils/
 
 ### 1. Installation
 1. Install [Intel RealSense Viewer](https://www.intelrealsense.com/sdk-2/) to simply visualize the data:
-![RealSense Viewer Interface](Misc/EgoView_Screenshot.png)
+![RealSense Viewer Interface](EgoView_Screenshot.png)
 
 2. Install package: `pip install pyrealsense2==2.51.1.4348`, tested successfully on python 3.9
 
