@@ -18,15 +18,15 @@ This guide covers the integration and data reading from three types of sensors:
     - **Manus**: Hand motion capture gloves
 - **Tactile Sensors**: Hand pressure sensors
 
-You can download the data through [data-Google Drive](https://drive.google.com/file/d/1iLZRwSk4tO-tLo2YsVI2Y8X6j828dt7L/view?usp=drive_link) and [SMPL-Google Drive](https://drive.google.com/file/d/1MT74651uUVoZ3wGgFw_Lh19sVXoz6sgq/view?usp=drive_link) or simply run
+You can download the data through [data-Google Drive](https://drive.google.com/file/d/1dTlTYgb09jW77nK7T4ALG2cZ0-bebG2O/view?usp=sharing) and [SMPL-Google Drive](https://drive.google.com/file/d/1gNyCf2G9gKQxY6I9Ydg3q8tw0rPwIWTF/view?usp=sharing) or simply run
 
 ```bash
 # Prepare data
-gdown 1iLZRwSk4tO-tLo2YsVI2Y8X6j828dt7L
+gdown 1dTlTYgb09jW77nK7T4ALG2cZ0-bebG2O
 unzip data_pilot.zip
 # Prepare SMPL
-gdown 1MT74651uUVoZ3wGgFw_Lh19sVXoz6sgq
-unzip Optitrack2SMPL.zip -d utils/
+gdown 1gNyCf2G9gKQxY6I9Ydg3q8tw0rPwIWTF
+unzip Optitrack2SMPL.zip
 ```
 
 ## RealSense
