@@ -23,8 +23,7 @@ You can download the data through [data-Google Drive](https://drive.google.com/f
 ```bash
 # Prepare data
 gdown 1iLZRwSk4tO-tLo2YsVI2Y8X6j828dt7L
-unzip data_and_models.zip
-mv data_and_models/* . && rmdir data_and_models/
+unzip data_pilot.zip
 # Prepare SMPL
 gdown 1MT74651uUVoZ3wGgFw_Lh19sVXoz6sgq
 unzip Optitrack2SMPL.zip -d utils/
@@ -46,11 +45,11 @@ python utils/realsense.py
 
 ## OptiTrack
 There are 2 **flaws** in the existing code:
-1. The current code can not handle new human skeleton and articulated object markers correctly, so the following scripts uses demo data instead.
-2. The matching code for hand motion and object position is not complete.
+1. Current code can handle human skeleton and articulated object markers correctly, the error in the demo is due to a problem with the Optitrack system export.
+2. The code for matching hand motion, tactile and object position is incomplete.
 ### 1. Export data
 ```python
-python utils/Optitrack2SMPL/demo/visualize.py
+python utils/optitrack_visualize.py
 ```
 
 ## Tactile

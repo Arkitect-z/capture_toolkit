@@ -3,14 +3,14 @@ import numpy as np
 import cv2
 import os
 import shutil
-import datetime # For getting bag file duration
-from tqdm import tqdm # For progress bar
+import datetime
+from tqdm import tqdm
 
 class RealSenseBagProcessor:
     """
     A class for processing Intel RealSense .bag files.
     It can extract, align, and save RGB and depth image data (as individual files and videos),
-    and extract and save IMU data.
+    extract and save IMU data, and save stream specification details.
     """
     def __init__(self, bag_file_path):
         """
@@ -87,34 +87,70 @@ class RealSenseBagProcessor:
         except Exception as e:
             print(f"Error during stream info initialization: {e}")
             if not self.color_stream_profile:
-                 print("Error: Could not get color stream info. Video export and frame count estimation might fail.")
-                 # Optionally raise an exception or allow continuation with some features disabled
-
+                print("Error: Could not get color stream info. Video export and frame count estimation might fail.")
 
     def _create_output_dirs(self, *dirs):
-        """Creates output directories. Does not clear them by default for video/IMU."""
+        """Creates output directories."""
         for d in dirs:
-            # if os.path.exists(d): # Uncomment if you prefer to clear these too
-                # print(f"Clearing existing directory: {d}")
-                # shutil.rmtree(d)
-                # os.makedirs(d, exist_ok=True)
-            os.makedirs(d, exist_ok=True) # Creates if not exists, does nothing if it exists
+            os.makedirs(d, exist_ok=True)
             print(f"Output directory ensured: {d}")
 
+    def _write_intrinsics(self, file, profile):
+        """Helper function to write stream intrinsics to a file."""
+        intrinsics = profile.get_intrinsics()
+        file.write(f"  Intrinsics:\n")
+        file.write(f"    - fx (focal length x): {intrinsics.fx}\n")
+        file.write(f"    - fy (focal length y): {intrinsics.fy}\n")
+        file.write(f"    - ppx (principal point x): {intrinsics.ppx}\n")
+        file.write(f"    - ppy (principal point y): {intrinsics.ppy}\n")
+        file.write(f"    - width: {intrinsics.width}\n")
+        file.write(f"    - height: {intrinsics.height}\n")
+        file.write(f"    - Distortion Model: {intrinsics.model}\n")
+        file.write(f"    - Distortion Coeffs: {intrinsics.coeffs}\n")
+
+    def _save_stream_specifications(self, output_spec_dir):
+        """Saves RGB and Depth stream specifications to a text file."""
+        spec_file_path = os.path.join(output_spec_dir, "stream_specifications.txt")
+        print(f"Saving stream specifications to: {spec_file_path}")
+        with open(spec_file_path, 'w') as f:
+            f.write(f"Specifications for: {os.path.basename(self.bag_file_path)}\n")
+            f.write(f"Processed on: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write("="*40 + "\n\n")
+
+            if self.color_stream_profile:
+                f.write("--- RGB Color Stream Specs ---\n")
+                f.write(f"- Resolution: {self.color_stream_profile.width()} x {self.color_stream_profile.height()}\n")
+                f.write(f"- FPS: {self.color_stream_profile.fps()}\n")
+                f.write(f"- Format: {self.color_stream_profile.format()}\n")
+                self._write_intrinsics(f, self.color_stream_profile)
+                f.write("\n")
+
+            if self.depth_stream_profile:
+                f.write("--- Depth Stream Specs ---\n")
+                depth_sensor = self.profile.get_device().first_depth_sensor()
+                depth_scale = depth_sensor.get_depth_scale()
+                f.write(f"- Resolution: {self.depth_stream_profile.width()} x {self.depth_stream_profile.height()}\n")
+                f.write(f"- FPS: {self.depth_stream_profile.fps()}\n")
+                f.write(f"- Format: {self.depth_stream_profile.format()}\n")
+                f.write(f"- Depth Scale: {depth_scale:.6f} (Multiply raw depth value by this to get meters)\n")
+                self._write_intrinsics(f, self.depth_stream_profile)
+                f.write("\n")
+        print("Stream specifications saved.")
 
     def process_and_save_all(self, 
                              output_dir_color_frames, 
                              output_dir_depth_raw_frames, 
                              output_dir_depth_viz_frames,
-                             output_video_dir, # New: Video output directory
-                             output_imu_dir,   # New: IMU data output directory
+                             output_video_dir,
+                             output_imu_dir,
+                             output_spec_dir, # New: Spec file output directory
                              save_individual_frames=True,
                              save_video=True,
                              save_imu_data=True,
                              depth_colormap_enabled=True,
-                             video_codec='mp4v'): # e.g., 'mp4v' (H.264 for .mp4), 'XVID' (for .avi)
+                             video_codec='mp4v'):
         """
-        Processes the .bag file, saving individual frames, videos, and IMU data.
+        Processes the .bag file, saving individual frames, videos, IMU data, and specs.
         """
         self._initialize_streams_and_get_info() # Get stream info first
 
@@ -122,18 +158,19 @@ class RealSenseBagProcessor:
         if save_individual_frames:
             for d in [output_dir_color_frames, output_dir_depth_raw_frames, output_dir_depth_viz_frames]:
                 if os.path.exists(d):
-                    print(f"Clearing existing directory for individual frames: {d}")
                     shutil.rmtree(d)
-                os.makedirs(d, exist_ok=True)
+                os.makedirs(d)
                 print(f"Output directory for individual frames ensured: {d}")
         
-        self._create_output_dirs(output_video_dir, output_imu_dir) # Ensure video/IMU dirs exist
+        self._create_output_dirs(output_video_dir, output_imu_dir, output_spec_dir) # Ensure video/IMU/spec dirs exist
+
+        # Save stream specification file
+        self._save_stream_specifications(output_spec_dir)
 
         color_video_writer = None
         depth_video_writer = None
         imu_file = None
         pbar = None
-        
         processed_color_frames_count = 0
 
         try:
@@ -150,10 +187,9 @@ class RealSenseBagProcessor:
                 else:
                     pbar = tqdm(desc="Processing frames", unit="frame") # Total unknown
             else:
-                print("Warning: Could not get playback control object.")
                 pbar = tqdm(desc="Processing frames", unit="frame") # Total unknown
 
-            # Initialize VideoWriters (if video saving is enabled and stream info is available)
+            # Initialize VideoWriters
             if save_video and self.color_stream_profile and self.video_width > 0 and self.video_height > 0:
                 video_extension = 'mp4' if video_codec.lower() in ['mp4v', 'h264', 'avc1'] else 'avi'
                 color_video_path = os.path.join(output_video_dir, f"rgb_video.{video_extension}")
@@ -168,8 +204,7 @@ class RealSenseBagProcessor:
                 print("Warning: Video saving disabled due to missing color stream info or invalid video dimensions.")
                 save_video = False
 
-
-            # Initialize IMU file (if enabled)
+            # Initialize IMU file
             if save_imu_data and (self.accel_stream_profile or self.gyro_stream_profile):
                 imu_file_path = os.path.join(output_imu_dir, "imu_data.csv")
                 imu_file = open(imu_file_path, 'w')
@@ -183,18 +218,16 @@ class RealSenseBagProcessor:
 
             while True:
                 try:
-                    # Wait for a coherent set of frames, with a timeout
-                    frames = self.pipeline.wait_for_frames(timeout_ms=10000) # 10 second timeout
+                    frames = self.pipeline.wait_for_frames(timeout_ms=10000)
                 except RuntimeError as e:
-                    if "Frame didn't arrive within" in str(e).lower() or "end of file" in str(e).lower():
+                    if "end of file" in str(e).lower() or "frame didn't arrive" in str(e).lower():
                         print("\nReached end of file or frame wait timeout.")
-                        break # Exit loop
+                        break
                     else:
-                        # print(f"\nRuntime error while waiting for frames: {e}") # Can be too verbose
                         if playback and playback.current_status() == rs.playback_status.stopped:
                             print("\nPlayback stopped (end of file).")
                             break
-                        continue # Try next frame
+                        continue
 
                 if not frames:
                     if playback and playback.current_status() == rs.playback_status.stopped:
@@ -209,32 +242,33 @@ class RealSenseBagProcessor:
                 
                 if color_frame and depth_frame:
                     processed_color_frames_count += 1
-                    color_image = np.asanyarray(color_frame.get_data())
+                    color_image_rgb = np.asanyarray(color_frame.get_data())
+                    
+                    # === COLOR FIX: Convert RGB (from RealSense) to BGR (for OpenCV) ===
+                    color_image_bgr = cv2.cvtColor(color_image_rgb, cv2.COLOR_RGB2BGR)
+                    # =====================================================================
+
                     depth_image_raw = np.asanyarray(depth_frame.get_data()) # uint16 raw data
-                    timestamp_ms = int(color_frame.get_timestamp()) # Use color frame's timestamp for aligned pair
+                    timestamp_ms = int(color_frame.get_timestamp())
+
+                    # Apply colormap for visualized depth frame
+                    depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image_raw, alpha=0.03), cv2.COLORMAP_JET)
 
                     if save_individual_frames:
                         color_filename = os.path.join(output_dir_color_frames, f"color_{timestamp_ms:013d}.png")
-                        cv2.imwrite(color_filename, color_image)
+                        cv2.imwrite(color_filename, color_image_bgr) # <-- Use BGR image
                         
                         depth_raw_filename = os.path.join(output_dir_depth_raw_frames, f"depth_raw_{timestamp_ms:013d}.npy")
                         np.save(depth_raw_filename, depth_image_raw)
                         
-                        # Apply colormap for visualized depth frame
-                        depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image_raw, alpha=0.03), cv2.COLORMAP_JET)
                         depth_viz_filename = os.path.join(output_dir_depth_viz_frames, f"depth_viz_{timestamp_ms:013d}.png")
                         cv2.imwrite(depth_viz_filename, depth_colormap)
                     
                     if save_video and color_video_writer and depth_video_writer:
-                        color_video_writer.write(color_image)
-                        # Ensure depth_colormap is available for video even if individual frames aren't saved with it
-                        if 'depth_colormap' not in locals() or not depth_colormap_enabled:
-                             depth_colormap_for_video = cv2.applyColorMap(cv2.convertScaleAbs(depth_image_raw, alpha=0.03), cv2.COLORMAP_JET)
-                        else:
-                             depth_colormap_for_video = depth_colormap # Use already computed one if available
-                        depth_video_writer.write(depth_colormap_for_video)
+                        color_video_writer.write(color_image_bgr) # <-- Use BGR image
+                        depth_video_writer.write(depth_colormap)
                     
-                    frame_count_for_pbar_update +=1 # Increment for progress bar only on successful image pair
+                    frame_count_for_pbar_update += 1
 
                 # --- Process IMU frames ---
                 if save_imu_data and imu_file:
@@ -242,8 +276,8 @@ class RealSenseBagProcessor:
                         if frame.is_motion_frame():
                             motion = frame.as_motion_frame()
                             m_profile = motion.get_profile()
-                            ts = motion.get_timestamp() # double, milliseconds
-                            data = motion.get_motion_data() # rs.vector (x,y,z)
+                            ts = motion.get_timestamp()
+                            data = motion.get_motion_data()
                             
                             stream_type_name = "UnknownMotion" # Default
                             if m_profile.stream_type() == rs.stream.accel:
@@ -256,9 +290,6 @@ class RealSenseBagProcessor:
                 if pbar and frame_count_for_pbar_update > 0:
                     pbar.update(frame_count_for_pbar_update)
                     frame_count_for_pbar_update = 0
-                elif pbar and not (color_frame and depth_frame): # If no image frames but loop continues (e.g. for IMU)
-                    pbar.update(0) # Keep progress bar active
-
 
         except Exception as e:
             print(f"\nAn error occurred during processing: {e}")
@@ -284,14 +315,13 @@ class RealSenseBagProcessor:
                 print(f"Individual raw depth data saved to: {os.path.abspath(output_dir_depth_raw_frames)}")
                 print(f"Individual visualized depth frames saved to: {os.path.abspath(output_dir_depth_viz_frames)}")
 
-
 # --- Test Code ---
 if __name__ == "__main__":
     # ================================================================
     # Configuration Parameters - Please modify these paths and options
     # ================================================================
     # BAG_FILE = r"C:\path\to\your\realsense_recording.bag" # Windows example
-    BAG_FILE = "RealSense/20250528_000356.bag" # <--- Modify to your .bag file path (Linux/MacOS example)
+    BAG_FILE = "data_pilot/RealSense/20250528_000356.bag" # <--- Modify to your .bag file path (Linux/MacOS example)
 
     # Base output directory
     OUTPUT_BASE_DIR = "realsense_export"
@@ -306,6 +336,9 @@ if __name__ == "__main__":
 
     # Output directory for IMU data (if save_imu_data = True)
     OUTPUT_IMU_DIR = os.path.join(OUTPUT_BASE_DIR, "imu_data")
+
+    # New: Output directory for the stream specifications file
+    OUTPUT_SPEC_DIR = os.path.join(OUTPUT_BASE_DIR, "specifications")
     # ================================================================
 
     # Check if the .bag file exists
@@ -316,7 +349,6 @@ if __name__ == "__main__":
     else:
         print(f"Using .bag file: {os.path.abspath(BAG_FILE)}")
 
-
     try:
         processor = RealSenseBagProcessor(bag_file_path=BAG_FILE)
         
@@ -326,6 +358,7 @@ if __name__ == "__main__":
             output_dir_depth_viz_frames=OUTPUT_DEPTH_VIZ_FRAMES_DIR,
             output_video_dir=OUTPUT_VIDEO_DIR,
             output_imu_dir=OUTPUT_IMU_DIR,
+            output_spec_dir=OUTPUT_SPEC_DIR, # Pass the new directory
             save_individual_frames=True, # Set to True or False
             save_video=True,             # Set to True or False
             save_imu_data=True,          # Set to True or False
