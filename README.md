@@ -1,4 +1,4 @@
-# Multi-Sensor Data Reading Guide
+# Dataset Toolkit
 
 This document provides instructions for operating data from OptiTrack motion capture systems, Intel RealSense cameras, and tactile sensors.
 
