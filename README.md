@@ -18,6 +18,18 @@ This guide covers the integration and data reading from three types of sensors:
     - **Manus**: Hand motion capture gloves
 - **Tactile Sensors**: Hand pressure sensors
 
+You can download the data through [data-Google Drive](https://drive.google.com/file/d/1iLZRwSk4tO-tLo2YsVI2Y8X6j828dt7L/view?usp=drive_link) and [SMPL-Google Drive](https://drive.google.com/file/d/1MT74651uUVoZ3wGgFw_Lh19sVXoz6sgq/view?usp=drive_link) or simply run
+
+```bash
+# Prepare data
+gdown 1iLZRwSk4tO-tLo2YsVI2Y8X6j828dt7L
+unzip data_and_models.zip
+mv data_and_models/* . && rmdir data_and_models/
+# Prepare SMPL
+gdown 1MT74651uUVoZ3wGgFw_Lh19sVXoz6sgq
+unzip Optitrack2SMPL.zip -d utils/
+```
+
 ## RealSense
 
 ### 1. Installation
@@ -43,12 +55,4 @@ python utils/Optitrack2SMPL/demo/visualize.py
 
 ## Tactile
 
-### 1. Common Tactile Sensor Types
-- **Resistive sensors**: Change resistance based on applied pressure
-- **Capacitive sensors**: Change capacitance with touch/proximity
-- **Piezoelectric sensors**: Generate voltage when deformed
 
-### 2. Arduino-based Tactile Reading
-```python
-python utils/Optitrack2SMPL/demo/visualize.py
-```
