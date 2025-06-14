@@ -45,12 +45,13 @@ python utils/realsense.py
 
 ## OptiTrack
 There are 2 **flaws** in the existing code:
-1. Current code can handle human skeleton and articulated object markers correctly, the error in the demo is due to a problem with the Optitrack system export.
+1. ~~Current code can handle human skeleton and articulated object markers correctly, the error in the demo is due to a problem with the Optitrack system export.~~
 2. The code for matching hand motion, tactile and object position is incomplete.
 ### 1. Export data
 ```python
 python utils/optitrack_visualize.py
 ```
+This will export a video and SMPL motion data.
 
 ## Tactile
 
