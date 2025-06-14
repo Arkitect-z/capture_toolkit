@@ -10,3 +10,7 @@ __pycache__/
 Optitrack2SMPL/
 *.zip
 *.pkl
+*.npz
+*.npy
+*.png
+*.mp4

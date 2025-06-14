@@ -40,7 +40,7 @@ unzip Optitrack2SMPL.zip
 ### 2. Export data
 The following script will export RGB, depth and IMU data shown above simultaneously.
 ```bash
-python utils/realsense.py
+python utils/run_realsense.py
 ```
 
 ## OptiTrack
@@ -49,7 +49,7 @@ There are 2 **flaws** in the existing code:
 2. The code for matching hand motion, tactile and object position is incomplete.
 ### 1. Export data
 ```python
-python utils/optitrack_visualize.py
+python utils/run_optitrack.py
 ```
 This will export a video and SMPL motion data.
 

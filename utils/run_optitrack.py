@@ -5,10 +5,10 @@ root_dir = os.path.dirname(os.path.abspath(__file__))
 if root_dir not in sys.path:
     sys.path.append(root_dir)
 
-from optitrack_processor import Configuration, OptiTrackProcessor
+from optitrack_processor import OptitrackConfiguration, OptiTrackProcessor
 
 if __name__ == "__main__":
-    config = Configuration(
+    config = OptitrackConfiguration(
         file_path=os.path.join("data_pilot", "OptiTrack", "Take 2025-06-13 02.55.37 PM.csv"),
         model_type="smpl",
         gender="neutral",

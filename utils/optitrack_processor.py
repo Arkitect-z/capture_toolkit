@@ -10,7 +10,7 @@ from optitrack.utils.smplx_utils import get_smplx_model, get_model_out
 from optitrack.utils.kp_convert import get_body_pose
 from optitrack.utils.pytorch3d_utils import sequence_visualize
 
-class Configuration:
+class OptitrackConfiguration:
     """
     A class to hold all configuration parameters for OptiTrack data processing.
     This makes it easy to pass settings to the processing function.
@@ -44,7 +44,7 @@ class OptiTrackProcessor:
     A processor class to handle OptiTrack data conversion.
     It separates data loading, motion export, and video rendering into distinct methods.
     """
-    def __init__(self, config: Configuration):
+    def __init__(self, config: OptitrackConfiguration):
         """
         Initializes the processor, sets up the environment, and loads data.
         """
