@@ -8,3 +8,5 @@ object/
 SMPL/
 __pycache__/
 Optitrack2SMPL/
+*.zip
+*.pkl

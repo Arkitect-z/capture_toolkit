@@ -9,7 +9,7 @@ root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if root_dir not in sys.path:
     sys.path.append(root_dir)
 
-from optitrack.utils.csv_utils import read_optitrack_data
+from optitrack.utils.csv_utils import read_optitrack_data, get_joint_position
 from optitrack.utils.smplx_utils import get_smplx_model, get_model_out
 # from utils.pytorch3d_utils import single_visualize # No longer used from here
 from optitrack.utils.pytorch3d_utils import sequence_visualize # Import the new method
@@ -17,14 +17,17 @@ from optitrack.utils.kp_convert import get_body_pose
 
 if __name__ == "__main__":
     # --- Configuration ---
-    file_path = os.path.join("data_pilot/OptiTrack", "Take 2025-05-28 12.04.10 AM.csv")
+    file_path = os.path.join("data_pilot/OptiTrack", "Take 2025-06-13 02.55.37 PM.csv")
     model_type = "smpl"
     gender = "neutral"
     batch_size = 128 # Number of frames to process in one go by get_model_out
     
     output_folder = "./optitrack_export"
     video_filename = "human_motion.mp4" # Potentially new name for the direct video
+    motion_filename = "smpl_motion.npz" # Output filename for the SMPL motion data
+    
     output_video_path = os.path.join(output_folder, video_filename)
+    output_motion_path = os.path.join(output_folder, motion_filename)
     
     video_fps = 120  # Frames per second for the output video
     image_render_size = 1024 # Size of the rendered images/video frames
@@ -66,6 +69,40 @@ if __name__ == "__main__":
         df_bone, model_type=model_type, human_name=human_name, batch=batch_size
     ) #
     print(f"Data prepared into {len(batched_input_args)} batches.")
+
+    # --- Save SMPL Motion Data in AMASS Format ---
+    if batched_input_args:
+        print("Aggregating and saving data in AMASS format...")
+        
+        # 1. Aggregate poses
+        full_global_orient = torch.cat([b['global_orient'] for b in batched_input_args], dim=0)
+        full_body_pose = torch.cat([b['body_pose'] for b in batched_input_args], dim=0)
+        poses = torch.cat([full_global_orient, full_body_pose], dim=1).cpu().numpy()
+
+        # 2. Get translation data for the root joint (Hip)
+        trans = get_joint_position(df_bone, "Hip", human_name).cpu().numpy()
+
+        # 3. Create shape parameters (betas) - single vector for the whole sequence
+        betas_num = 10 if model_type == 'smpl' else 16
+        betas = np.zeros(betas_num)
+
+        # 4. For compatibility, create zero-filled dmpls (dynamic soft-tissue params)
+        num_frames = poses.shape[0]
+        dmpls = np.zeros((num_frames, 8))
+
+        # 5. Save the data to an .npz file with AMASS-compatible keys
+        np.savez(
+            output_motion_path,
+            poses=poses,                     # Body poses (num_frames, 72)
+            trans=trans,                     # Root translation (num_frames, 3)
+            betas=betas,                     # Body shape (10,) or (16,)
+            mocap_framerate=video_fps,       # Motion capture framerate
+            gender=str(gender),              # Subject gender
+            dmpls=dmpls                      # Dynamic blendshapes (num_frames, 8)
+        )
+        print(f"SMPL motion data saved successfully in AMASS format to {output_motion_path}")
+    else:
+        print("No pose data was generated, skipping SMPL motion data export.")
 
     # --- Accumulate All Frame Vertices ---
     all_frames_vertices = [] # List to store vertices [num_verts, 3] for each frame

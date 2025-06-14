@@ -46,14 +46,38 @@ def read_optitrack_data(filepath):
     return df_bone, df_rigid_body, human_list, obj_list
 
 
+# def get_joint_axis_angle(df_bone, joint, human_name):
+#     col_names = [
+#         ":".join([human_name, joint, "Rotation", quat])
+#         for quat in ("W", "X", "Y", "Z")
+#     ]
+#     quat = torch.tensor(
+#         df_bone[col_names].values, dtype=torch.float32, device=device
+#     )  # (N, 4)
+#     return quaternion_to_axis_angle(quat)
+# Fix "ValueError: Found zero norm quaternions in 'quat'" when Optitrack loses marker tracking
 def get_joint_axis_angle(df_bone, joint, human_name):
     col_names = [
         ":".join([human_name, joint, "Rotation", quat])
         for quat in ("W", "X", "Y", "Z")
     ]
+    # Load data, ensuring that any potential NaN values from pandas are converted to 0.0
+    values = df_bone[col_names].fillna(0.0).values
     quat = torch.tensor(
-        df_bone[col_names].values, dtype=torch.float32, device=device
+        values, dtype=torch.float32, device=device
     )  # (N, 4)
+
+    # Find quaternions with a norm close to zero, which are invalid.
+    norms = torch.linalg.norm(quat, dim=1)
+    zero_norm_indices = torch.where(norms < 1e-6)[0]
+
+    # Replace these invalid quaternions with an identity quaternion [w=1, x=0, y=0, z=0],
+    # which represents no rotation.
+    if len(zero_norm_indices) > 0:
+        identity_quat = torch.tensor([1.0, 0.0, 0.0, 0.0], dtype=torch.float32, device=device)
+        quat[zero_norm_indices] = identity_quat
+        print(f"INFO: Found and fixed {len(zero_norm_indices)} invalid zero-norm quaternions for joint '{joint}'.")
+
     return quaternion_to_axis_angle(quat)
 
 
@@ -104,3 +128,27 @@ def read_manus_data(filepath):
     df_bone = df[available_columns]
 
     return df_bone
+
+def get_joint_position(df_bone, joint, human_name):
+    """
+    Extracts the 3D position of a specific joint over time.
+    """
+    col_names = [
+        ":".join([human_name, joint, "Position", pos])
+        for pos in ("X", "Y", "Z")
+    ]
+    position_df = df_bone[col_names]
+
+    # Use pandas' interpolate method to fill NaN values.
+    # 'linear' interpolation creates a smooth transition for missing frames.
+    # 'limit_direction="both"' ensures that NaNs at the very start or end are also filled.
+    interpolated_df = position_df.interpolate(method='linear', limit_direction='both')
+
+    # Convert the cleaned DataFrame's values to a tensor.
+    # Note: OptiTrack may export position in millimeters.
+    # If so, you might need to divide the values by 1000 to convert to meters.
+    pos = torch.tensor(
+        interpolated_df.values, dtype=torch.float32, device=device
+    )
+    
+    return pos
