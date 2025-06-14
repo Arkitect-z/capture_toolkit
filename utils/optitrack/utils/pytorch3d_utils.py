@@ -175,7 +175,7 @@ def sequence_visualize(all_vertices_list, # List of tensors, each [num_verts, 3]
         shader=SoftPhongShader(device=current_device, cameras=cameras, lights=lights, materials=materials),
     )
 
-    print(f"Starting video generation for {output_video_path}...")
+    # print(f"Starting video generation for {output_video_path}...")
     # Using imageio to write the video
     # Added macro_block_size=1 which can help with some codecs if frame dimensions are not divisible by macro block size.
     with imageio.get_writer(output_video_path, fps=fps, macro_block_size=1) as video_writer:

@@ -115,9 +115,9 @@ def get_model_out(model, input_args=None):
         )
         model_output = model(betas=betas, **input_args)
 
-    print(
-        f"You are using {model_type} - NUM_BODY_JOINTS {model.NUM_BODY_JOINTS}, NUM_JOINTS {model.NUM_JOINTS}, NUM_BETAS {model.num_betas}"
-    )
+    # print(
+    #     f"You are using {model_type} - NUM_BODY_JOINTS {model.NUM_BODY_JOINTS}, NUM_JOINTS {model.NUM_JOINTS}, NUM_BETAS {model.num_betas}"
+    # )
 
     #  for k, v in model_output.items():
     #      if isinstance(v, torch.Tensor):

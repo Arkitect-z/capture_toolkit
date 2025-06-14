@@ -76,7 +76,7 @@ def get_joint_axis_angle(df_bone, joint, human_name):
     if len(zero_norm_indices) > 0:
         identity_quat = torch.tensor([1.0, 0.0, 0.0, 0.0], dtype=torch.float32, device=device)
         quat[zero_norm_indices] = identity_quat
-        print(f"INFO: Found and fixed {len(zero_norm_indices)} invalid zero-norm quaternions for joint '{joint}'.")
+        # print(f"INFO: Found and fixed {len(zero_norm_indices)} invalid zero-norm quaternions for joint '{joint}'.")
 
     return quaternion_to_axis_angle(quat)
 
