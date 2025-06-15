@@ -48,7 +48,7 @@ There are 2 **flaws** in the existing code:
 1. ~~Current code can handle human skeleton and articulated object markers correctly, the error in the demo is due to a problem with the Optitrack system export.~~
 2. The code for matching hand motion, tactile and object position is incomplete.
 ### 1. Export data
-```python
+```bash
 python utils/run_optitrack.py
 ```
 This will export a video and SMPL motion data.
