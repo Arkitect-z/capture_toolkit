@@ -22,18 +22,18 @@ You can download the data through [data-Google Drive](https://drive.google.com/f
 
 ### 1. Installation
 ```bash
-git clone https://github.com/Arkitect-z/capture_toolkit.git
-conda create -y -n capture python=3.9
-conda activate capture
+git clone https://github.com/Arkitect-z/capture_toolkit.git && cd capture_toolkit
+conda create -y -n capture python=3.9 && conda activate capture
 pip install torch torchvision
+pip install "git+https://github.com/facebookresearch/pytorch3d.git"
 pip install -r requirements.txt
-# pyrealsense2==2.51.1.4348 was tested successfully on python 3.9
+# pyrealsense2==2.51.1.4348 was tested successfully on python=3.9
 # Prepare data
 gdown 1dTlTYgb09jW77nK7T4ALG2cZ0-bebG2O
-unzip data_pilot.zip
+unzip data_pilot.zip && rm data_pilot.zip
 # Prepare SMPL
 gdown 1gNyCf2G9gKQxY6I9Ydg3q8tw0rPwIWTF
-unzip Optitrack2SMPL.zip
+unzip Optitrack2SMPL.zip && rm Optitrack2SMPL.zip
 ```
 
 ## RealSense

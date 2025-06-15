@@ -1,4 +1,6 @@
 imageio
+imageio[ffmpeg]
+imageio[pyav]
 matplotlib
 numpy==1.23.0
 opencv_python
@@ -6,6 +8,11 @@ pandas
 pyrealsense2==2.51.1.4348
 scipy
 tqdm
+gdown
+smplx[all]
+plotly
+chumpy
 
-opencv_contrib_python_headless==4.11.0.86
-opencv_python_headless==4.11.0.86
+
+opencv_contrib_python_headless
+opencv_python_headless

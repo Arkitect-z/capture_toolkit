@@ -19,7 +19,7 @@ def main():
     output_base_directory = "optitrack_export"
     
     # Use glob to find all .csv files in the input directory
-    csv_files = glob.glob(os.path.join(input_directory, "*.csv"))
+    csv_files = glob.glob(os.path.join(input_directory, "*M.csv"))
     if not csv_files:
         print(f"Error: No .csv files found in '{input_directory}'")
         return
