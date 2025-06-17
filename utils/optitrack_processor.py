@@ -135,10 +135,31 @@ class OptiTrackProcessor:
             return
 
         print("Aggregating and saving data in AMASS format...")
+        
+        # Aggregate all parts from batches
         full_global_orient = torch.cat([b['global_orient'] for b in batched_input_args], dim=0)
         full_body_pose = torch.cat([b['body_pose'] for b in batched_input_args], dim=0)
-        poses = torch.cat([full_global_orient, full_body_pose], dim=1).cpu().numpy()
-        trans = get_joint_position(self.df_bone, "Hip", self.human_name).cpu().numpy()
+        
+        if self.config.model_type == 'smplx':
+            full_left_hand_pose = torch.cat([b['left_hand_pose'] for b in batched_input_args], dim=0)
+            full_right_hand_pose = torch.cat([b['right_hand_pose'] for b in batched_input_args], dim=0)
+            poses = torch.cat([
+                full_global_orient, 
+                full_body_pose, 
+                full_right_hand_pose, 
+                full_left_hand_pose
+            ], dim=1).cpu().numpy()
+        else: # smpl or smplh
+             poses = torch.cat([full_global_orient, full_body_pose], dim=1).cpu().numpy()
+
+        # Handle hand only input (cases where 'Hip' joint for translation is not available).
+        try:
+            trans = get_joint_position(self.df_bone, "Hip", self.human_name).cpu().numpy()
+        except KeyError:
+            print("Warning: 'Hip' joint not found for translation. Defaulting to zero translation.")
+            num_frames = poses.shape[0]
+            trans = np.zeros((num_frames, 3))
+
         betas_num = 10 if self.config.model_type == 'smpl' else 16
         betas = np.zeros(betas_num)
         dmpls = np.zeros((poses.shape[0], 8))
@@ -149,6 +170,7 @@ class OptiTrackProcessor:
             mocap_framerate=self.config.video_fps, gender=str(self.config.gender), dmpls=dmpls
         )
         print(f"SMPL motion data saved successfully to {self.config.output_motion_path}")
+
 
     def export_video(self):
         """

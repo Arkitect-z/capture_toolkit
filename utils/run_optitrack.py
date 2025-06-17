@@ -39,11 +39,11 @@ def main():
         config = OptitrackConfiguration(
             file_path=csv_file,
             output_folder=output_folder_for_file,
-            model_type="smpl",
+            model_type="smplx",
             gender="neutral",
             batch_size=128,
             video_filename="human_motion.mp4",
-            motion_filename="smpl_motion.npz",
+            motion_filename="smplx_motion.npz",
             video_fps=120,
             image_render_size=1024
         )

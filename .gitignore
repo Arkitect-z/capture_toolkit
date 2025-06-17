@@ -8,9 +8,7 @@ object/
 SMPL/
 __pycache__/
 Optitrack2SMPL/
+optitrack_export/
+realsense_export/
+data_pilot/
 *.zip
-*.pkl
-*.npz
-*.npy
-*.png
-*.mp4

@@ -104,3 +104,63 @@ MANUS2MANO = {
     "Thumb_DIP": 15,
 }
 
+# SMPL-X mapping: Maps OptiTrack joint names to (tensor_name, index)
+OPTI2SMPLX = {
+    # Body Joints (mapped to body_pose tensor)
+    "Hip": ("global_orient", 0),
+    "LThigh": ("body_pose", 0),
+    "RThigh": ("body_pose", 1),
+    "Ab": ("body_pose", 2),
+    "LShin": ("body_pose", 3),
+    "RShin": ("body_pose", 4),
+    "Chest": ("body_pose", 5),
+    "LFoot": ("body_pose", 6),
+    "RFoot": ("body_pose", 7),
+    # Spine3 maps to index 8
+    "LToe": ("body_pose", 9),
+    "RToe": ("body_pose", 10),
+    "Neck": ("body_pose", 11),
+    "LShoulder": ("body_pose", 12),  # Left Collar
+    "RShoulder": ("body_pose", 13),  # Right Collar
+    "Head": ("body_pose", 14),
+    "LUArm": ("body_pose", 15),
+    "RUArm": ("body_pose", 16),
+    "LFArm": ("body_pose", 17),
+    "RFArm": ("body_pose", 18),
+    "LHand": ("body_pose", 19), # Left Wrist
+    "RHand": ("body_pose", 20), # Right Wrist
+
+    # Left Hand (mapped to left_hand_pose tensor)
+    "LIndex1": ("left_hand_pose", 1),
+    "LIndex2": ("left_hand_pose", 2),
+    "LIndex3": ("left_hand_pose", 3),
+    "LMiddle1": ("left_hand_pose", 4),
+    "LMiddle2": ("left_hand_pose", 5),
+    "LMiddle3": ("left_hand_pose", 6),
+    "LPinky1": ("left_hand_pose", 7),
+    "LPinky2": ("left_hand_pose", 8),
+    "LPinky3": ("left_hand_pose", 9),
+    "LRing1": ("left_hand_pose", 10),
+    "LRing2": ("left_hand_pose", 11),
+    "LRing3": ("left_hand_pose", 12),
+    "LThumb1": ("left_hand_pose", 13),
+    "LThumb2": ("left_hand_pose", 14),
+    "LThumb3": ("left_hand_pose", 15),
+
+    # Right Hand (mapped to right_hand_pose tensor)
+    "RIndex1": ("right_hand_pose", 1),
+    "RIndex2": ("right_hand_pose", 2),
+    "RIndex3": ("right_hand_pose", 3),
+    "RMiddle1": ("right_hand_pose", 4),
+    "RMiddle2": ("right_hand_pose", 5),
+    "RMiddle3": ("right_hand_pose", 6),
+    "RPinky1": ("right_hand_pose", 7),
+    "RPinky2": ("right_hand_pose", 8),
+    "RPinky3": ("right_hand_pose", 9),
+    "RRing1": ("right_hand_pose", 10),
+    "RRing2": ("right_hand_pose", 11),
+    "RRing3": ("right_hand_pose", 12),
+    "RThumb1": ("right_hand_pose", 13),
+    "RThumb2": ("right_hand_pose", 14),
+    "RThumb3": ("right_hand_pose", 15),
+}
