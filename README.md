@@ -40,24 +40,33 @@ unzip Optitrack2SMPL.zip && rm Optitrack2SMPL.zip
 
 ### 1. Visualization
 Install [Intel RealSense Viewer](https://www.intelrealsense.com/sdk-2/) to simply visualize the data:
-![RealSense Viewer Interface](EgoView_Screenshot.png)
+<details>
+    <summary>Visualization Example</summary>
+    <img src="assets/EgoView_Screenshot.png" align=center />
+</details>
 
 ### 2. Export data
 The following script will export RGB, depth and IMU data shown above simultaneously.
 ```bash
 python utils/run_realsense.py
 ```
+<details>
+    <summary>Export Example</summary>
+    <img src="assets/realsense_export.png" width = "170" height = "210" alt="图片名称" align=center />
+</details>
 
 ## OptiTrack
-There are 2 **flaws** in the existing code:
-1. ~~Current code can handle human skeleton and articulated object markers correctly, the error in the demo is due to a problem with the Optitrack system export.~~
-2. The code for matching hand motion, tactile and object position is incomplete.
 ### 1. Export data
 ```bash
 python utils/run_optitrack.py
 ```
 This will export a video and SMPL motion data.
+<details>
+    <summary>Video Example</summary>
+    <video id="video" controls="" preload="none" poster="封面">
+      <source id="mp4" src="assets/man_skating.mp4" type="video/mp4">
+    </videos>
+</details>
 
 ## Tactile
-
-
+#TODO
