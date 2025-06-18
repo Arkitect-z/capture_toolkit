@@ -52,7 +52,7 @@ python utils/run_realsense.py
 ```
 <details>
     <summary>Export Example</summary>
-    <img src="assets/realsense_export.png" width = "170" height = "210" alt="图片名称" align=center />
+    <img src="assets/realsense_export.png" width = "270" height = "340" align=center />
 </details>
 
 ## OptiTrack
@@ -60,12 +60,14 @@ python utils/run_realsense.py
 ```bash
 python utils/run_optitrack.py
 ```
-This will export a video and SMPL motion data.
+This will export a video and SMPL-X motion data.
 <details>
     <summary>Video Example</summary>
-    <video id="video" controls="" preload="none" poster="封面">
-      <source id="mp4" src="assets/man_skating.mp4" type="video/mp4">
-    </videos>
+    
+
+https://github.com/user-attachments/assets/4fa949a6-d2c9-4787-af17-8eb7bd8de521
+
+
 </details>
 
 ## Tactile
