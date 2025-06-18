@@ -18,8 +18,6 @@ This guide covers the integration and data reading from three types of sensors:
     - **Manus**: Hand motion capture gloves
 - **Tactile Sensors**: Hand pressure sensors
 
-You can download the data through [data-Google Drive](https://drive.google.com/file/d/1dTlTYgb09jW77nK7T4ALG2cZ0-bebG2O/view?usp=sharing) and [SMPL-Google Drive](https://drive.google.com/file/d/1gNyCf2G9gKQxY6I9Ydg3q8tw0rPwIWTF/view?usp=sharing) or simply run
-
 ### 1. Installation
 ```bash
 git clone https://github.com/Arkitect-z/capture_toolkit.git && cd capture_toolkit
@@ -28,6 +26,11 @@ pip install torch torchvision
 pip install "git+https://github.com/facebookresearch/pytorch3d.git"
 pip install -r requirements.txt
 # pyrealsense2==2.51.1.4348 was tested successfully on python=3.9
+```
+If pytorch3d fails to install, try from a [local clone](https://github.com/facebookresearch/pytorch3d/blob/main/INSTALL.md#2-install-from-a-local-clone).
+
+You can download the data through [data-Google Drive](https://drive.google.com/file/d/1dTlTYgb09jW77nK7T4ALG2cZ0-bebG2O/view?usp=sharing) and [SMPL-Google Drive](https://drive.google.com/file/d/1gNyCf2G9gKQxY6I9Ydg3q8tw0rPwIWTF/view?usp=sharing) or simply run
+```bash
 # Prepare data
 gdown 1dTlTYgb09jW77nK7T4ALG2cZ0-bebG2O
 unzip data_pilot.zip && rm data_pilot.zip
