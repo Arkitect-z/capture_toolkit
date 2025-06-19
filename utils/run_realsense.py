@@ -1,48 +1,19 @@
 import os
 import glob
+import traceback
 from realsense_processor import RealSenseConfiguration, RealSenseProcessor
 
-def main():
+def process_realsense_data(configs):
     """
-    Main function to configure and run the BATCH/SERIAL processing of RealSense .bag files,
-    with a final summary report of any errors.
+    Main function to run the BATCH/SERIAL processing of RealSense .bag files based on provided configurations.
+    Includes a final summary report of any errors.
+
+    Args:
+        configs (list[RealSenseConfiguration]): A list of configuration objects to process.
     """
-    # --- Configuration ---
-    input_directory = "data_pilot/RealSense"
-    output_base_directory = "realsense_export"
-    
-    # Use glob to find all .bag files in the input directory
-    bag_files = glob.glob(os.path.join(input_directory, "*.bag"))
-    if not bag_files:
-        print(f"Error: No .bag files found in '{input_directory}'")
-        return
-
-    total_files = len(bag_files)
-    print(f"Found {total_files} .bag files to process serially.")
-
     # --- Initialization for error reporting ---
     failed_files = []
-    
-    # --- Create a list of configurations for each file ---
-    configs = []
-    for bag_file in bag_files:
-        config = RealSenseConfiguration(
-            bag_file_path=bag_file,
-            output_base_dir=output_base_directory,
-            
-            # --- Select what you want to export ---
-            export_rgb_video=True,
-            export_depth_video=True,
-            export_imu_data=True,
-            export_specifications=True,
-            export_color_frames=True,
-            export_depth_frames_raw=True,
-            export_depth_frames_visualized=True,
-            
-            # --- Other settings ---
-            video_codec='mp4v'  # Use 'mp4v' for .mp4, 'XVID' for .avi
-        )
-        configs.append(config)
+    total_files = len(configs)
 
     # --- Run processing serially with progress indicators ---
     for i, config in enumerate(configs):
@@ -64,7 +35,6 @@ def main():
 
         except Exception as e:
             # If an error occurs, print it and add the file to the list of failures
-            import traceback
             print(f"\n[ERROR] An unexpected error occurred with {file_basename}: {e}\n{traceback.format_exc()}")
             failed_files.append(file_basename)
 
@@ -82,4 +52,41 @@ def main():
     print("\n--- All serial processing tasks are complete. ---")
 
 if __name__ == "__main__":
-    main()
+    """
+    This block is executed when the script is run directly.
+    It discovers .bag files, creates configurations, and calls the main processing function.
+    """
+    # --- Configuration ---
+    input_directory = "data_pilot/RealSense"
+    output_base_directory = "realsense_export"
+    
+    # Use glob to find all .bag files in the input directory
+    bag_files = glob.glob(os.path.join(input_directory, "*.bag"))
+    if not bag_files:
+        print(f"Error: No .bag files found in '{input_directory}'")
+    else:
+        print(f"Found {len(bag_files)} .bag files to process serially.")
+
+        # --- Create a list of configurations for each file ---
+        configurations = []
+        for bag_file in bag_files:
+            config = RealSenseConfiguration(
+                bag_file_path=bag_file,
+                output_base_dir=output_base_directory,
+                
+                # --- Select what you want to export ---
+                export_rgb_video=True,
+                export_depth_video=True,
+                export_imu_data=True,
+                export_specifications=True,
+                export_color_frames=True,
+                export_depth_frames_raw=True,
+                export_depth_frames_visualized=True,
+                
+                # --- Other settings ---
+                video_codec='mp4v'  # Use 'mp4v' for .mp4, 'XVID' for .avi
+            )
+            configurations.append(config)
+
+        # Call the main function with the generated configurations
+        process_realsense_data(configurations)
