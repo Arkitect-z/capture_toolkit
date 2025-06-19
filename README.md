@@ -74,4 +74,25 @@ https://github.com/user-attachments/assets/4fa949a6-d2c9-4787-af17-8eb7bd8de521
 </details>
 
 ## Tactile
-#TODO
+### 1. Export data
+```bash
+python utils/run_tactile.py
+```
+This will export a 120hz hand tactile data.
+
+### 2. Data visualization
+```bash
+python utils/run_tactile_webapp.py
+```
+This will start a visualization system, load the raw tactile data in `data_pilot.zip` for visualization.
+<details>
+    <summary>Data Visualization</summary>
+
+
+https://github.com/user-attachments/assets/9c05c21f-a0bb-476e-b868-6712618afc8b
+
+
+
+</details>
+
+#TODO: Timing alignment of all modalities.
