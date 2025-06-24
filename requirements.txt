@@ -13,6 +13,9 @@ smplx[all]
 plotly
 chumpy
 
-
 opencv_contrib_python_headless
 opencv_python_headless
+
+dash-bootstrap-components
+
+aiozipstream

@@ -1,5 +1,7 @@
 # Dataset Toolkit
 
+[![](https://img.shields.io/badge/language-English-blue)](README.md) [![](https://img.shields.io/badge/language-简体中文-blue)](README_zh.md)
+
 This document provides instructions for operating data from OptiTrack motion capture systems, Intel RealSense cameras, and tactile sensors.
 
 ## Table of Contents
