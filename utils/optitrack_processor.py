@@ -51,7 +51,8 @@ class OptiTrackProcessor:
         self.config = config
         self.device = None
         self.df_bone = None
-        self.human_name = None
+        # FIX: Changed from self.human_name to self.human_list to handle multiple entities
+        self.human_list = None
         self.smpl_model_tuple = None
         self.faces_tensor = None
         self._batched_input_args = None
@@ -79,9 +80,9 @@ class OptiTrackProcessor:
             raise ValueError("Error: No human found in the OptiTrack data.")
 
         self.df_bone = df_bone
-        self.human_name = human_list[0]
-        print(f"Processing data for human: {self.human_name}")
-        print(f"Total frames to process from CSV: {self.df_bone.shape[0]}")
+        # FIX: Store the entire list of humans found, not just the first one.
+        self.human_list = human_list
+        print(f"Processing data for humans: {self.human_list}")
 
         print(f"Loading {self.config.model_type} model with gender: {self.config.gender}")
         self.smpl_model_tuple = get_smplx_model(model_type=self.config.model_type, gender=self.config.gender)
@@ -93,8 +94,9 @@ class OptiTrackProcessor:
         """Internal method to process and cache body pose data."""
         if self._batched_input_args is None:
             print("Preparing body pose data in batches...")
+            # FIX: Pass the entire human_list to get_body_pose instead of a single human_name.
             self._batched_input_args = get_body_pose(
-                self.df_bone, model_type=self.config.model_type, human_name=self.human_name, batch=self.config.batch_size
+                self.df_bone, model_type=self.config.model_type, human_list=self.human_list, batch=self.config.batch_size
             )
             print(f"Data prepared into {len(self._batched_input_args)} batches.")
         return self._batched_input_args
@@ -154,8 +156,10 @@ class OptiTrackProcessor:
 
         # Handle hand only input (cases where 'Hip' joint for translation is not available).
         try:
-            trans = get_joint_position(self.df_bone, "Hip", self.human_name).cpu().numpy()
-        except KeyError:
+            # FIX: Use the first human in the list as the primary one for translation data.
+            primary_human = self.human_list[0] if self.human_list else None
+            trans = get_joint_position(self.df_bone, "Hip", primary_human).cpu().numpy()
+        except (KeyError, TypeError):
             print("Warning: 'Hip' joint not found for translation. Defaulting to zero translation.")
             num_frames = poses.shape[0]
             trans = np.zeros((num_frames, 3))

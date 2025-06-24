@@ -45,7 +45,8 @@ def split_dict_into_batches(data_dict, batch_size):
     return batches
 
 
-def get_body_pose(df_bone, model_type, human_name, batch=None):
+# FIX: The function now accepts a list of human names (`human_list`) instead of a single `human_name`.
+def get_body_pose(df_bone, model_type, human_list, batch=None):
     kpDict = get_variable_value("OPTI2" + model_type.upper())
     num_frames = df_bone.shape[0]
 
@@ -55,9 +56,10 @@ def get_body_pose(df_bone, model_type, human_name, batch=None):
             "global_orient": torch.zeros(num_frames, 3, device=device),
             "body_pose": torch.zeros(num_frames, 23 * 3, device=device)
         }
+        primary_human_name = human_list[0] if human_list else None
         # prepare smpl input_args
         for joint, idx in kpDict.items():
-            axis_angle = get_joint_axis_angle(df_bone, joint, human_name)
+            axis_angle = get_joint_axis_angle(df_bone, joint, primary_human_name)
             if idx == 0:
                 input_args["global_orient"] = axis_angle
             else:
@@ -87,21 +89,40 @@ def get_body_pose(df_bone, model_type, human_name, batch=None):
             "jaw_pose": torch.zeros(num_frames, 3, device=device),
             "leye_pose": torch.zeros(num_frames, 3, device=device),
             "reye_pose": torch.zeros(num_frames, 3, device=device),
-            # FIX: Add expression tensor with correct batch size
             "expression": torch.zeros(num_frames, 10, device=device),
         }
+        
+        # FIX: Dynamically find the correct human name for left and right hands.
+        human_name_L = next((name for name in human_list if 'L' in name.upper()), None)
+        human_name_R = next((name for name in human_list if 'R' in name.upper()), None)
+        # Use the first human as a fallback or for non-hand joints
+        primary_human_name = human_list[0] if human_list else None
         
         # Populate tensors using the OPTI2SMPLX mapping
         for joint, (tensor_name, idx) in kpDict.items():
             try:
-                axis_angle = get_joint_axis_angle(df_bone, joint, human_name)
+                # FIX: Determine which human_name to use for the current joint.
+                target_human_name = None
+                if joint.startswith('L') and human_name_L:
+                    target_human_name = human_name_L
+                elif joint.startswith('R') and human_name_R:
+                    target_human_name = human_name_R
+                else:
+                    # For global_orient (Hip) or other body parts, use the primary human.
+                    target_human_name = primary_human_name
+
+                # If no suitable human name was found for this joint, skip it.
+                if not target_human_name:
+                    # print(f"Warning: Could not determine human entity for joint '{joint}'. Skipping.")
+                    continue
+
+                axis_angle = get_joint_axis_angle(df_bone, joint, target_human_name)
                 
                 if tensor_name == "global_orient":
                     input_args["global_orient"] = axis_angle
                 else:
                     # For pose tensors, the index is 0-based for joints,
                     # so we map to the correct slice (idx*3 to idx*3+3)
-                    # Note: SMPL-X hand pose indices in the model are 1-15, but our mapping is 0-based for the tensor.
                     if 'hand_pose' in tensor_name:
                          # Hand poses are 15*3. The mapping index is 1-based in my previous definition,
                          # let's correct it to be 0-based index for slicing
@@ -111,7 +132,7 @@ def get_body_pose(df_bone, model_type, human_name, batch=None):
 
             except KeyError:
                 # This allows processing to continue even if a specific bone is missing from the CSV
-                # print(f"Warning: Joint '{joint}' not found in OptiTrack data. Skipping.")
+                # print(f"Warning: Joint '{joint}' under '{target_human_name}' not found. Skipping.")
                 pass
         
     elif model_type == "mano":

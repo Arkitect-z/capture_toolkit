@@ -60,7 +60,7 @@ def cal_camera_RT(mesh, device_to_use=None): # Added device_to_use
     # Set up the camera
     # FIX: Add 180 degrees to the azimuth angle 'azim' to rotate the view.
     R, T = look_at_view_transform(
-        dist=camera_distance, elev=20, azim=30 + 270, at=center.to(current_device)
+        dist=camera_distance, elev=20, azim=30+50, at=center.to(current_device)
     )
 
     return R.to(current_device), T.to(current_device)
