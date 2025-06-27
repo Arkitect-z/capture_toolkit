@@ -4,6 +4,10 @@
 
 本文档提供了操作来自 OptiTrack 运动捕捉系统、Intel RealSense 深度相机和触觉传感器的数据的说明。
 
+## 更新动态
+
+2025-06-25: 与微波炉交互（包含平视，弯腰和下蹲动作），与简单物体（书）交互，链接: [Google Drive](https://drive.google.com/file/d/1a8Ye2qrJW0ZEUzySNt9Riqn-RblRU4vV/view?usp=sharing).
+
 ## 目录
 
 1. [概述](#概述)
@@ -52,6 +56,8 @@ unzip data_pilot.zip && rm data_pilot.zip
 gdown 1gNyCf2G9gKQxY6I9Ydg3q8tw0rPwIWTF
 unzip Optitrack2SMPL.zip && rm Optitrack2SMPL.zip
 ```
+
+运行以下命令前，请将代码 `input_directory = “your-data-path/your-data-folder”` 更改为正确的路径。
 
 ## RealSense
 

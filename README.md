@@ -4,6 +4,10 @@
 
 This document provides instructions for operating data from OptiTrack motion capture systems, Intel RealSense cameras, and tactile sensors.
 
+## Updates
+
+2025-06-25: Interacting with a microwave (includes leveling, bending and crouching motions), interacting with simple objects (books), link: [Google Drive](https://drive.google.com/file/d/1a8Ye2qrJW0ZEUzySNt9Riqn-RblRU4vV/view?usp=sharing).
+
 ## Table of Contents
 
 1. [Overview](#overview)
@@ -40,6 +44,8 @@ unzip data_pilot.zip && rm data_pilot.zip
 gdown 1gNyCf2G9gKQxY6I9Ydg3q8tw0rPwIWTF
 unzip Optitrack2SMPL.zip && rm Optitrack2SMPL.zip
 ```
+
+Remember to change the code `input_directory = "your-data-path/your-data-folder"` to the right path before running the following commands.
 
 ## RealSense
 

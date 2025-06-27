@@ -80,7 +80,7 @@ class RealSenseProcessor:
         self.profile = None
         self.video_width = 0
         self.video_height = 0
-        self.video_fps = 30.0
+        self.video_fps = 60.0
 
         self._initialize_stream_profiles()
 
